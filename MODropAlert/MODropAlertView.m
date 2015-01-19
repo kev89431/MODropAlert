@@ -40,6 +40,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     NSString *descrptionStr;
     
     UIImageView *bg;
+    UIView *alertView;
     
     UILabel *titleLabel;
     UILabel *descriptionLabel;
@@ -50,6 +51,10 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     DropAlertViewType kType;
     UIColor *okButtonColor;
     UIColor *cancelButtonColor;
+}
+
+- (void)setContentView:(UIView *)view {
+    alertView = view;
 }
 
 #pragma mark - Initialized Drop Alert Methods
