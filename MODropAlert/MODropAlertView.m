@@ -53,10 +53,6 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     UIColor *cancelButtonColor;
 }
 
-- (void)setContentView:(UIView *)view {
-    alertView = view;
-}
-
 #pragma mark - Initialized Drop Alert Methods
 - (instancetype)initDropAlertWithTitle:(NSString *)title
                            description:(NSString *)description
@@ -168,6 +164,25 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     [self moveAlertPopupView];
 }
 
+- (instancetype)initDropAlert:(UIView *)view {
+    self = [super init];
+    if (self) {
+        self.frame = [self mainScreenFrame];
+        self.opaque = YES;
+        self.backgroundColor = [UIColor clearColor];
+        
+        CGRect screen = [self mainScreenFrame];
+        alertView = view;
+        alertView.center = CGPointMake(screen.size.width/2, screen.size.height/2);
+        alertView.layer.masksToBounds = YES;
+
+        [self makeBackgroundBlur];
+        [self addSubview:view];
+        [self moveAlertPopupView];
+    }
+    return self;
+}
+
 #pragma mark - View Layout Methods
 - (void)makeBackgroundBlur
 {
@@ -189,7 +204,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 
 - (void)makeAlertPopupView
 {
-    CGRect frame = CGRectMake(0, 0, 200, 200);
+    CGRect frame = CGRectMake(0, 0, 320, 200);
     CGRect screen = [self mainScreenFrame];
     
     alertView = [[UIView alloc]initWithFrame:frame];

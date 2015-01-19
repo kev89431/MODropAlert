@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, DropAlertButtonType) {
 
 - (void)show;
 - (void)dismiss;
-- (void)setContentView:(UIView *)view;
+- (instancetype)initDropAlert:(UIView *)view;
 
 @end
 
