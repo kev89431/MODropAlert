@@ -40,7 +40,6 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     NSString *descrptionStr;
     
     UIImageView *bg;
-    UIView *alertView;
     
     UILabel *titleLabel;
     UILabel *descriptionLabel;
