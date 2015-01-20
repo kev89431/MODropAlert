@@ -9,9 +9,6 @@
 #import "MODropAlertView.h"
 #import "UIImage+ImageEffects.h"
 
-#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
-
 static const CGFloat kAlertButtonBottomMargin = 10;
 static const CGFloat kAlertButtonSideMargin = 15;
 static const CGFloat kAlertButtonsBetweenMargin = 3;
@@ -35,11 +32,11 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     
 @private
     NSString *okButtonTitleStr;
-    NSString *cancelButtonTitleStr;
+    NSString *cancelButtonTitleString;
     NSString *titleStr;
-    NSString *descrptionStr;
+    NSString *descrptionString;
     
-    UIImageView *bg;
+    UIImageView *backgroundView;
     UIView *alertView;
     
     UILabel *titleLabel;
@@ -51,6 +48,8 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     DropAlertViewType kType;
     UIColor *okButtonColor;
     UIColor *cancelButtonColor;
+    blk successBlockCallback;
+    blk failureBlockCallback;
 }
 
 #pragma mark - Initialized Drop Alert Methods
@@ -58,7 +57,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                            description:(NSString *)description
                          okButtonTitle:(NSString *)okButtonTitle
 {
-    return [self initDropAlertWithTitle:title 
+    return [self initDropAlertWithTitle:title
                             description:description
                           okButtonTitle:okButtonTitle
                       cancelButtonTitle:nil
@@ -67,9 +66,12 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                               alertType:DropAlertDefault];
 }
 
-- (instancetype)initDropAlertWithTitle:(NSString *)title description:(NSString *)description okButtonTitle:(NSString *)okButtonTitle cancelButtonTitle:(NSString *)cancelButtonTitle
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                     cancelButtonTitle:(NSString *)cancelButtonTitle
 {
-    return [self initDropAlertWithTitle:title 
+    return [self initDropAlertWithTitle:title
                             description:description
                           okButtonTitle:okButtonTitle
                       cancelButtonTitle:cancelButtonTitle
@@ -83,11 +85,11 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                          okButtonTitle:(NSString *)okButtonTitle
                          okButtonColor:(UIColor *)okBtnColor
 {
-    return [self initDropAlertWithTitle:title 
+    return [self initDropAlertWithTitle:title
                             description:description
                           okButtonTitle:okButtonTitle
                       cancelButtonTitle:nil
-                            okButtonColor:okBtnColor
+                          okButtonColor:okBtnColor
                       cancelButtonColor:nil
                               alertType:DropAlertCustom];
 }
@@ -102,30 +104,11 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                             description:description
                           okButtonTitle:okButtonTitle
                       cancelButtonTitle:cancelButtonTitle
-                        okButtonColor:okBtnColor
+                          okButtonColor:okBtnColor
                       cancelButtonColor:cancelBtnColor
                               alertType:DropAlertCustom];
 }
 
-- (instancetype)initDropAlertWithTitle:(NSString *)title
-                           description:(NSString *)description
-                         okButtonTitle:(NSString *)okButtonTitle
-                     cancelButtonTitle:(NSString *)cancelButtonTitle
-                             alertType:(DropAlertViewType)alertType
-{
-    self = [super init];
-    if (self) {
-        okButtonTitleStr = okButtonTitle;
-        cancelButtonTitleStr = cancelButtonTitle;
-        descrptionStr = description;
-        titleStr = title;
-        kType = alertType;
-        okButtonColor = nil;
-        cancelButtonColor = nil;
-        [self initDropAlert];
-    }
-    return self;
-}
 - (instancetype)initDropAlertWithTitle:(NSString *)title
                            description:(NSString *)description
                          okButtonTitle:(NSString *)okButtonTitle
@@ -137,12 +120,109 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     self = [super init];
     if (self) {
         okButtonTitleStr = okButtonTitle;
-        cancelButtonTitleStr = cancelButtonTitle;
-        descrptionStr = description;
+        cancelButtonTitleString = cancelButtonTitle;
+        descrptionString = description;
         titleStr = title;
         kType = alertType;
         okButtonColor = okBtnColor;
         cancelButtonColor = cancelBtnColor;
+        [self initDropAlert];
+    }
+    return self;
+}
+
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                          successBlock:(blk)successBlock
+{
+    return [self initDropAlertWithTitle:title
+                            description:description
+                          okButtonTitle:okButtonTitle
+                      cancelButtonTitle:nil
+                          okButtonColor:nil
+                      cancelButtonColor:nil
+                           successBlock:successBlock
+                           failureBlock:nil
+                              alertType:DropAlertDefault];
+}
+
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                     cancelButtonTitle:(NSString *)cancelButtonTitle
+                          successBlock:(blk)successBlock
+                          failureBlock:(blk)failureBlock
+{
+    return [self initDropAlertWithTitle:title
+                            description:description
+                          okButtonTitle:okButtonTitle
+                      cancelButtonTitle:cancelButtonTitle
+                          okButtonColor:nil
+                      cancelButtonColor:nil
+                           successBlock:successBlock
+                           failureBlock:failureBlock
+                              alertType:DropAlertDefault];
+}
+
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                         okButtonColor:(UIColor *)okBtnColor
+                          successBlock:(blk)successBlock
+{
+    return [self initDropAlertWithTitle:title
+                            description:description
+                          okButtonTitle:okButtonTitle
+                      cancelButtonTitle:nil
+                          okButtonColor:okButtonColor
+                      cancelButtonColor:nil
+                           successBlock:successBlock
+                           failureBlock:nil
+                              alertType:DropAlertCustom];
+}
+
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                     cancelButtonTitle:(NSString *)cancelButtonTitle
+                         okButtonColor:(UIColor *)okBtnColor
+                     cancelButtonColor:(UIColor *)cancelBtnColor
+                          successBlock:(blk)successBlock
+                          failureBlock:(blk)failureBlock
+{
+    return [self initDropAlertWithTitle:title
+                            description:description
+                          okButtonTitle:okButtonTitle
+                      cancelButtonTitle:cancelButtonTitle
+                          okButtonColor:okButtonColor
+                      cancelButtonColor:cancelButtonColor
+                           successBlock:successBlock
+                           failureBlock:failureBlock
+                              alertType:DropAlertCustom];
+}
+
+- (instancetype)initDropAlertWithTitle:(NSString *)title
+                           description:(NSString *)description
+                         okButtonTitle:(NSString *)okButtonTitle
+                     cancelButtonTitle:(NSString *)cancelButtonTitle
+                         okButtonColor:(UIColor *)okBtnColor
+                     cancelButtonColor:(UIColor *)cancelBtnColor
+                          successBlock:(blk)successBlock
+                          failureBlock:(blk)failureBlock
+                             alertType:(DropAlertViewType)alertType
+{
+    self = [super init];
+    if (self) {
+        okButtonTitleStr = okButtonTitle;
+        cancelButtonTitleString = cancelButtonTitle;
+        descrptionString = description;
+        titleStr = title;
+        kType = alertType;
+        okButtonColor = okBtnColor;
+        cancelButtonColor = cancelBtnColor;
+        successBlockCallback = successBlock;
+        failureBlockCallback = failureBlock;
         [self initDropAlert];
     }
     return self;
@@ -157,7 +237,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     [self makeBackgroundBlur];
     [self makeAlertPopupView];
     
-    [self makeAlertButton:cancelButtonTitleStr ? YES : NO];
+    [self makeAlertButton:cancelButtonTitleString ? YES : NO];
     [self makeAlertTitleLabel];
     [self makeAlertDescriptionLabel];
     
@@ -186,7 +266,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 #pragma mark - View Layout Methods
 - (void)makeBackgroundBlur
 {
-    bg = [[UIImageView alloc]initWithFrame:[self mainScreenFrame]];
+    backgroundView = [[UIImageView alloc]initWithFrame:[self mainScreenFrame]];
     
     UIImage *image = [UIImage convertViewToImage];
     UIImage *blurSnapshotImage = nil;
@@ -196,20 +276,20 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                              saturationDeltaFactor:1.8
                                          maskImage:nil];
     
-    bg.image = blurSnapshotImage;
-    bg.alpha = 0;
+    backgroundView.image = blurSnapshotImage;
+    backgroundView.alpha = 0;
     
-    [self addSubview:bg];
+    [self addSubview:backgroundView];
 }
 
 - (void)makeAlertPopupView
 {
-    CGRect frame = CGRectMake(0, 0, 320, 200);
+    CGRect frame = CGRectMake(0, 0, 200, 200);
     CGRect screen = [self mainScreenFrame];
     
     alertView = [[UIView alloc]initWithFrame:frame];
     
-    alertView.center = CGPointMake(screen.size.width/2, screen.size.height/2);
+    alertView.center = CGPointMake(CGRectGetWidth(screen)/2, CGRectGetHeight(screen)/2);
     
     alertView.layer.masksToBounds = YES;
     alertView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
@@ -219,8 +299,8 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 
 - (void)makeAlertTitleLabel
 {
-    titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, alertView.frame.size.width - kAlertButtonSideMargin, kAlertTitleLabelHeight)];
-    titleLabel.center = CGPointMake(alertView.frame.size.width/2, kAlertTitleLabelTopMargin);
+    titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, CGRectGetWidth(alertView.frame) - kAlertButtonSideMargin, kAlertTitleLabelHeight)];
+    titleLabel.center = CGPointMake(CGRectGetWidth(alertView.frame)/2, kAlertTitleLabelTopMargin);
     titleLabel.text = titleStr;
     titleLabel.textColor = [UIColor darkGrayColor];
     [titleLabel setTextAlignment:NSTextAlignmentCenter];
@@ -231,12 +311,12 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 
 - (void)makeAlertDescriptionLabel
 {
-    descriptionLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, alertView.frame.size.width - kAlertButtonSideMargin, kAlertDescriptionLabelHeight)];
-    descriptionLabel.center = CGPointMake(alertView.frame.size.width/2, kAlertTitleLabelTopMargin + titleLabel.frame.size.height + kALertDescriptionLabelTopMargin);
-    descriptionLabel.text = descrptionStr;
+    descriptionLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, CGRectGetWidth(alertView.frame) - kAlertButtonSideMargin, kAlertDescriptionLabelHeight)];
+    descriptionLabel.center = CGPointMake(CGRectGetWidth(alertView.frame)/2, kAlertTitleLabelTopMargin + CGRectGetHeight(titleLabel.frame) + kALertDescriptionLabelTopMargin);
+    descriptionLabel.text = descrptionString;
     descriptionLabel.textColor = [UIColor grayColor];
     descriptionLabel.font = [descriptionLabel.font fontWithSize:kAlertDescriptionLabelFontSize];
-
+    
     // Line Breaking
     descriptionLabel.lineBreakMode = NSLineBreakByWordWrapping;
     descriptionLabel.numberOfLines = 0;
@@ -253,13 +333,13 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     if (hasCancelButton) {
         cancelButton = [[UIButton alloc]init];
         
-        [okButton setFrame:CGRectMake(0, 0, alertView.frame.size.width/2 - kAlertButtonSideMargin, kAlertButtonHeight)];
-        [cancelButton setFrame:CGRectMake(0, 0, alertView.frame.size.width/2 - kAlertButtonSideMargin, kAlertButtonHeight)];
+        [okButton setFrame:CGRectMake(0, 0, CGRectGetWidth(alertView.frame)/2 - kAlertButtonSideMargin, kAlertButtonHeight)];
+        [cancelButton setFrame:CGRectMake(0, 0, CGRectGetWidth(alertView.frame)/2 - kAlertButtonSideMargin, kAlertButtonHeight)];
         
-        [okButton setCenter:CGPointMake(alertView.frame.size.width/4 + kAlertButtonsBetweenMargin,
-                                        alertView.frame.size.height - okButton.frame.size.height/2 - kAlertButtonBottomMargin)];
-        [cancelButton setCenter:CGPointMake(alertView.frame.size.width*3/4 - kAlertButtonsBetweenMargin,
-                                            alertView.frame.size.height - okButton.frame.size.height/2 - kAlertButtonBottomMargin)];
+        [okButton setCenter:CGPointMake(CGRectGetWidth(alertView.frame)/4 + kAlertButtonsBetweenMargin,
+                                        CGRectGetHeight(alertView.frame) - CGRectGetHeight(okButton.frame)/2 - kAlertButtonBottomMargin)];
+        [cancelButton setCenter:CGPointMake(CGRectGetWidth(alertView.frame)*3/4 - kAlertButtonsBetweenMargin,
+                                            CGRectGetHeight(alertView.frame) - CGRectGetHeight(okButton.frame)/2 - kAlertButtonBottomMargin)];
         
         if (cancelButtonColor) {
             [cancelButton setBackgroundImage:[UIImage imageWithColor:cancelButtonColor] forState:UIControlStateNormal];
@@ -268,20 +348,20 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
             [cancelButton setBackgroundImage:[UIImage imageWithColor:[self colorFromHexString:kAlertCancelButtonHighlightColor]] forState:UIControlStateHighlighted];
         }
         
-        [cancelButton setTitle:cancelButtonTitleStr
-                       forState:UIControlStateNormal];
+        [cancelButton setTitle:cancelButtonTitleString
+                      forState:UIControlStateNormal];
         [cancelButton.titleLabel setFont:[cancelButton.titleLabel.font fontWithSize:kAlertButtonFontSize]];
         [cancelButton addTarget:self
-                          action:@selector(pressAlertButton:)
-                forControlEvents:UIControlEventTouchUpInside];
+                         action:@selector(pressAlertButton:)
+               forControlEvents:UIControlEventTouchUpInside];
         
         [self setShadowLayer:cancelButton.layer];
         
         [alertView addSubview:cancelButton];
         
     } else {
-        [okButton setFrame:CGRectMake(0, 0, alertView.frame.size.width - (kAlertButtonSideMargin * 2), kAlertButtonHeight)];
-        [okButton setCenter:CGPointMake(alertView.frame.size.width/2, alertView.frame.size.height - okButton.frame.size.height/2 - kAlertButtonBottomMargin)];
+        [okButton setFrame:CGRectMake(0, 0, CGRectGetWidth(alertView.frame) - (kAlertButtonSideMargin * 2), kAlertButtonHeight)];
+        [okButton setCenter:CGPointMake(CGRectGetWidth(alertView.frame)/2, CGRectGetHeight(alertView.frame) - CGRectGetHeight(okButton.frame)/2 - kAlertButtonBottomMargin)];
     }
     [self setShadowLayer:okButton.layer];
     
@@ -293,11 +373,11 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     }
     
     [okButton setTitle:okButtonTitleStr
-               forState:UIControlStateNormal];
+              forState:UIControlStateNormal];
     [okButton.titleLabel setFont:[okButton.titleLabel.font fontWithSize:kAlertButtonFontSize]];
     [okButton addTarget:self
-                  action:@selector(pressAlertButton:)
-        forControlEvents:UIControlEventTouchUpInside];
+                 action:@selector(pressAlertButton:)
+       forControlEvents:UIControlEventTouchUpInside];
     
     [alertView addSubview:okButton];
 }
@@ -307,7 +387,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 {
     CGRect screen = [self mainScreenFrame];
     CATransform3D move = CATransform3DIdentity;
-    CGFloat initAlertViewYPosition = (screen.size.height + alertView.frame.size.height) / 2;
+    CGFloat initAlertViewYPosition = (CGRectGetHeight(screen) + CGRectGetHeight(alertView.frame)) / 2;
     
     move = CATransform3DMakeTranslation(0, -initAlertViewYPosition, 0);
     move = CATransform3DRotate(move, 40 * M_PI/180, 0, 0, 1.0f);
@@ -329,7 +409,7 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 - (void)showAnimation
 {
     [UIView animateWithDuration:0.3f animations:^{
-        bg.alpha = 1.0f;
+        backgroundView.alpha = 1.0f;
     }];
     
     
@@ -350,16 +430,26 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                      }];
 }
 
-- (void)dismiss
+- (void)dismiss:(DropAlertButtonType)buttonType
 {
-    if( [self.delegate respondsToSelector:@selector(alertViewWilldisappear:)] ) {
-        [self.delegate alertViewWilldisappear:self];
+    if(self.delegate && [self.delegate respondsToSelector:@selector(alertViewWilldisappear:buttonType:)] ) {
+        [self.delegate alertViewWilldisappear:self buttonType:buttonType];
     }
-    [self dismissAnimation];
+    [self dismissAnimation:buttonType];
 }
 
-- (void)dismissAnimation
+- (void)dismissAnimation:(DropAlertButtonType)buttonType
 {
+    blk cb;
+    switch (buttonType) {
+        case DropAlertButtonOK:
+            successBlockCallback ? cb = successBlockCallback: nil;
+            break;
+        case DropAlertButtonFail:
+            failureBlockCallback ? cb = failureBlockCallback: nil;
+        default:
+            break;
+    }
     [UIView animateWithDuration:0.8f
                           delay:0.0f
          usingSpringWithDamping:1.0f
@@ -369,18 +459,21 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
                          
                          CGRect screen = [self mainScreenFrame];
                          CATransform3D move = CATransform3DIdentity;
-                         CGFloat initAlertViewYPosition = screen.size.height;
+                         CGFloat initAlertViewYPosition = CGRectGetHeight(screen);
                          
                          move = CATransform3DMakeTranslation(0, initAlertViewYPosition, 0);
                          move = CATransform3DRotate(move, -40 * M_PI/180, 0, 0, 1.0f);
                          alertView.layer.transform = move;
                          
-                         bg.alpha = 0.0;
+                         backgroundView.alpha = 0.0;
                      }
                      completion:^(BOOL finished) {
-                         if ([self.delegate respondsToSelector:@selector(alertViewDidDisappear:)] && finished) {
-                             [self removeFromSuperview];
-                             [self.delegate alertViewDidDisappear:self];
+                         [self removeFromSuperview];
+                         if (cb) {
+                             cb();
+                         }
+                         else if (self.delegate && [self.delegate respondsToSelector:@selector(alertViewDidDisappear:buttonType:)] && finished) {
+                             [self.delegate alertViewDidDisappear:self buttonType:buttonType];
                          }
                      }];
     
@@ -392,24 +485,32 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     UIButton *button = (UIButton *)sender;
     
     DropAlertButtonType buttonType;
+    BOOL blockFlag = false;
     
     if( [button isEqual:okButton] ) {
         NSLog(@"Pressed Button is OkButton");
         buttonType = DropAlertButtonOK;
+        if (successBlockCallback) {
+            blockFlag = true;
+        }
     }
     else {
         NSLog(@"Pressed Button is CancelButton");
         buttonType = DropAlertButtonFail;
+        if (failureBlockCallback) {
+            blockFlag = true;
+        }
     }
     
-    if ([self.delegate respondsToSelector:@selector(alertViewPressButton:buttonType:)]) {
+    if ( !blockFlag && [self.delegate respondsToSelector:@selector(alertViewPressButton:buttonType:)]) {
         [self.delegate alertViewPressButton:self buttonType:buttonType];
     }
+    
+    [self dismiss:buttonType];
+    
 }
 
 #pragma mark - Util Methods
-
-
 - (CGRect)mainScreenFrame
 {
     return [UIScreen mainScreen].bounds;
@@ -431,44 +532,3 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 }
 
 @end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
